@@ -48,7 +48,7 @@ model trains. Its docs are at https://github.com/xingjian-bai/opal. Please set i
    show me what it prints (how long training will wait for the agent, also as a multiple of the run's own time, and
    the cost). Ask me for a cost cap (max_cost_usd); leave decisions unset unless I ask, so that the waiting stays
    within 4x the run's own time. Wait for my go-ahead; then give me the exact command to launch it, and how to
-   follow it (opal show, opal report).
+   follow it (opal show, opal watch, opal report).
 ```
 
 ## Start by hand
@@ -92,8 +92,9 @@ python train.py                                  # backend="keep": must match th
 opal doctor --live                               # one tiny agent call to check the setup
 opal estimate --total-steps 10000 --sec-per-step 0.05   # waiting time and cost, before you launch
 python train.py                                  # with max_cost_usd=20: the agent rewrites the optimizer
-opal show   opal_runs/<folder>                   # one line per decision
-opal report opal_runs/<folder>                   # one HTML page: loss, learning rates, rationales, code diffs
+opal show    opal_runs/<folder>                  # one line per decision
+opal watch   opal_runs/<folder>                  # events as they are written; --timeout 0 prints what is there
+opal report  opal_runs/<folder>                  # one HTML page: loss, learning rates, rationales, code diffs
 ```
 
 Each wrapped run prints a `profiler_start` / `profiler_stop` pair on stderr when a program starts: OPAL audits one

@@ -1,4 +1,4 @@
-"""opal broker | say | report | show | doctor | estimate"""
+"""opal broker | say | report | show | watch | doctor | estimate"""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ def _show(run):
     print(f"run {run}")
     if start.get("goal"):
         print(f"goal: {start['goal']}")
-    from .report import decision_counts, describe_counts, rank_repair_summary
+    from .report import decision_counts, describe_counts, end_cost, outcome_label, rank_repair_summary
 
     mode = start.get("blocking")
     mode = "auto-blocking" if mode == "auto" else "blocking" if mode else "non-blocking"
@@ -64,15 +64,7 @@ def _show(run):
         o = out.get(k, {})
         resp = _response(run, k)
         said = " ".join((resp.get("text") or "").split())[:70]
-        kind = o.get("kind", "pending")
-        if kind == "pending" and any(
-            e["kind"] in ("resumed", "end") and e.get("utc", "") > req[k].get("utc", "") for e in events
-        ):
-            kind = "lost"
-        if kind == "applied":
-            kind = "changed"
-        elif o.get("failed") and not o.get("gave_up"):
-            kind = "failed"
+        kind = outcome_label(events, req[k], o)
         cost = resp.get("cost_usd")
         print(
             f"{k:>4}  {req[k]['update']:>9,}  {kind:<11} {o.get('applied_at', ''):>9}  "
@@ -83,11 +75,7 @@ def _show(run):
             print(f"{e['kind']} at update {e.get('update')}")
     end = next((e for e in reversed(events) if e["kind"] == "end"), None)
     if end:
-        tokens = "usage" in end or start.get("backend") == "codex"
-        cost = "USD unavailable" if tokens and end.get("cost_usd") is None else f"${end.get('cost_usd') or 0:.2f}"
-        print(
-            f"finished at update {end['update']:,}; {end.get('decisions')} decisions; {cost}"
-        )
+        print(f"finished at update {end['update']:,}; {end.get('decisions')} decisions; {end_cost(start, end)}")
 
 
 def doctor_mailbox(spec):
@@ -310,6 +298,22 @@ def main(argv=None):
     w = sub.add_parser("show", help="print a run's decisions and where its final program is")
     w.add_argument("run")
 
+    h = sub.add_parser("watch", help="print a run's events as they are written")
+    h.add_argument("run")
+    h.add_argument(
+        "--interval",
+        type=float,
+        default=1.0,
+        help="seconds between checks of events.jsonl (default 1)",
+    )
+    h.add_argument(
+        "--timeout",
+        type=float,
+        help="seconds to wait for a new event, then exit with 1; 0 prints what is there and returns (1 if the run has "
+        "not finished); omitted: wait for the run's end event. A run killed without close() (SIGTERM, SIGKILL, out of "
+        "memory) never writes one: use --timeout",
+    )
+
     d = sub.add_parser("doctor", help="check that torch and an agent CLI are ready on this machine")
     d.add_argument("--live", action="store_true", help="also make one tiny agent call (costs a few cents)")
     d.add_argument(
@@ -346,6 +350,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.cmd == "doctor" and a.backend not in ("claude", "codex") and not a.backend.startswith("mailbox:"):
         ap.error("doctor --backend must be claude, codex or mailbox:<folder>")
+    if a.cmd == "watch" and not 0 < a.interval < float("inf"):  # also rejects nan
+        ap.error("watch --interval must be greater than 0")
+    if a.cmd == "watch" and a.timeout is not None and not 0 <= a.timeout < float("inf"):
+        ap.error("watch --timeout must be zero or positive")
     if a.cmd == "estimate":
         return estimate_cmd(a)
     if a.cmd == "broker":
@@ -399,6 +407,18 @@ def main(argv=None):
         _show(run)
         print(f"final program: {final_program(run)}")
         print("rerun it with no agent: opal.replay(<that folder>, optimizer, model, total_steps=...)")
+    elif a.cmd == "watch":
+        from . import watch as watchmod
+
+        try:
+            return watchmod.follow(_run_folder(a.run), interval=a.interval, timeout=a.timeout)
+        except KeyboardInterrupt:
+            return 130  # Ctrl-C ends the watch, not the run
+        except BrokenPipeError:  # the reader went away (| head): stop quietly, as opal show does
+            import os
+
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())  # so the exit flush cannot fail again
+            return 0
     return 0
 
 

@@ -296,6 +296,28 @@ def _finished(events) -> bool:
 OUTCOMES = ("applied", "kept", "rejected", "load_failed")
 
 
+def outcome_label(events, requested, outcome) -> str:
+    """What `opal show` calls a decision, from its requested event and its outcome event ({} while there is none):
+    changed, kept, rejected, load_failed, cancelled, failed (the agent call failed), pending, or lost (no answer, and
+    the run ended or resumed after it was asked)."""
+    kind = outcome.get("kind", "pending")
+    if kind == "pending" and any(
+        e.get("kind") in ("resumed", "end") and e.get("utc", "") > requested.get("utc", "") for e in events
+    ):
+        kind = "lost"
+    if kind == "applied":
+        kind = "changed"
+    elif outcome.get("failed") and not outcome.get("gave_up"):
+        kind = "failed"
+    return kind
+
+
+def end_cost(start, end) -> str:
+    """The agent cost of a finished run as `opal show` prints it; USD unavailable for a token-reporting backend."""
+    tokens = "usage" in end or start.get("backend") == "codex"
+    return "USD unavailable" if tokens and end.get("cost_usd") is None else f"${end.get('cost_usd') or 0:.2f}"
+
+
 def decision_counts(events) -> dict:
     """Scheduled, asked, answered and applied decisions of a run, so a run whose agent was mostly not asked shows at a
     glance. Answered: the agent's answer came (applied, kept or rejected), not a failed or abandoned backend call.

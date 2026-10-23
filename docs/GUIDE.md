@@ -11,8 +11,10 @@ description and tags. You can read what the agent said and the diff of each chan
 decision and at the end of the run.
 
 `opal show <folder>` prints one line per decision: when it was asked, what happened, its time and cost, and the start
-of the rationale. `opal report <folder>` rebuilds the page at any time. Every program version is in `programs/`.
-Each decision's message and answer are in `decisions/`. Events are in `events.jsonl`.
+of the rationale. `opal watch <folder>` prints each event as `events.jsonl` grows, and returns when the run finishes.
+A run killed without `close()` (SIGTERM, SIGKILL, out of memory) never writes its end, so give it `--timeout`.
+`--timeout 0` prints what is already there. `opal report <folder>` rebuilds the page at any time. Every program
+version is in `programs/`. Each decision's message and answer are in `decisions/`. Events are in `events.jsonl`.
 
 ## How it works
 
@@ -202,8 +204,8 @@ Accelerate fp16 GradScaler and `gradient_accumulation_steps` greater than 1 are 
 
 Use `opt.log(validation_accuracy=value)` to record a measurement without showing it to the agent.
 Finish a keep check with `opal show` and `opal report` on the printed run folder. Leave out `--summarize` to avoid
-model calls. The `profiler_start` / `profiler_stop` lines on stderr come from OPAL's one audited update per new
-program and are harmless.
+model calls. During a longer run, `opal watch` prints events as they are written. The `profiler_start` /
+`profiler_stop` lines on stderr come from OPAL's one audited update per new program and are harmless.
 
 ## Experimental Codex backend
 
@@ -522,7 +524,7 @@ Give the run `backend_options=dict(timeout=...)` to state the same limit from th
 including under `nohup` or a file. Failed mailbox reads are reported every ten failures.
 `--give-up-after-min M` exits with an error after M minutes of failures.
 The mailbox backend takes `backend_options=dict(poll=2, broker_wait=120, timeout=21600)`.
-Run `opal show`, `report` and `say` on the training side's run folder.
+Run `opal show`, `watch`, `report` and `say` on the training side's run folder.
 
 ## Safety
 
