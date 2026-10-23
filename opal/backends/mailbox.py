@@ -587,10 +587,12 @@ class _Folder:
                 except OSError:
                     continue  # not a run, or removed meanwhile
         else:
-            p = self._sh(
+            script = (
                 f'cd {self._q()} 2>/dev/null || exit 3; for d in */; do test -f "$d/RUN" && '
                 f'echo "$(stat -c %Y "$d/RUN" 2>/dev/null || stat -f %m "$d/RUN") ${{d%/}}"; done; exit 0'
             )
+            # in sh, not the login shell: zsh fails on a glob that matches nothing ("no matches found: */")
+            p = self._sh("sh -c " + shlex.quote(script))
             if p.returncode != 0:
                 raise RuntimeError(f"ssh listing failed ({p.returncode}): {p.stderr.decode()[-300:]}")
             for line in p.stdout.decode().splitlines():

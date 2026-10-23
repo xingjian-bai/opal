@@ -141,3 +141,34 @@ def test_remote_missing_mailbox_is_distinct_from_an_empty_one(tmp_path, monkeypa
     assert _Folder(str(empty), ssh="h").runs() == []
     with pytest.raises(RuntimeError, match="listing failed"):
         _Folder(str(tmp_path / "missing"), ssh="h").runs()
+
+
+ZSH_SSH = textwrap.dedent(
+    """\
+    #!/bin/sh
+    for last; do :; done
+    exec zsh -c "$last"
+    """
+)
+
+
+def test_ssh_listing_works_when_the_remote_login_shell_is_zsh(tmp_path, monkeypatch):
+    import shutil
+
+    import pytest
+
+    if not shutil.which("zsh"):
+        pytest.skip("zsh is not installed")
+    b = tmp_path / "bin"
+    b.mkdir()
+    (b / "ssh").write_text(ZSH_SSH)  # the remote command runs in zsh, as on hosts whose login shell is zsh
+    (b / "ssh").chmod(0o755)
+    monkeypatch.setenv("PATH", f"{b}{os.pathsep}{os.environ['PATH']}")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    box = tmp_path / "box"
+    box.mkdir()
+    f = _Folder(str(box), ssh="h")
+    assert f.runs() == []  # zsh fails on a glob that matches nothing: "no matches found: */"
+    (box / "run1").mkdir()
+    (box / "run1" / "RUN").write_text("{}")
+    assert f.runs() == ["run1"]
