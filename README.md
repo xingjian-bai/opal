@@ -95,6 +95,7 @@ python train.py                                  # with max_cost_usd=20: the age
 opal show    opal_runs/<folder>                  # one line per decision
 opal watch   opal_runs/<folder>                  # events as they are written; --timeout 0 prints what is there
 opal report  opal_runs/<folder>                  # one HTML page: loss, learning rates, rationales, code diffs
+opal compare opal_runs/<a> opal_runs/<b>         # two runs, or two result.json files, side by side
 ```
 
 Each wrapped run prints a `profiler_start` / `profiler_stop` pair on stderr when a program starts: OPAL audits one

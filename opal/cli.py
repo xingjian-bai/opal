@@ -1,4 +1,4 @@
-"""opal broker | say | report | show | watch | doctor | estimate"""
+"""opal broker | say | report | show | watch | compare | doctor | estimate"""
 
 from __future__ import annotations
 
@@ -314,6 +314,19 @@ def main(argv=None):
         "memory) never writes one: use --timeout",
     )
 
+    c = sub.add_parser(
+        "compare",
+        help="set two run folders, or two result.json files, beside each other",
+    )
+    c.add_argument("a", help="a run folder (events.jsonl) or a result.json")
+    c.add_argument("b", help="the other run folder or result.json")
+    c.add_argument(
+        "--json",
+        action="store_true",
+        help='print the two summaries and the differing decisions as JSON; NaN and infinite numbers are written as the '
+        'strings "nan", "inf" and "-inf"',
+    )
+
     d = sub.add_parser("doctor", help="check that torch and an agent CLI are ready on this machine")
     d.add_argument("--live", action="store_true", help="also make one tiny agent call (costs a few cents)")
     d.add_argument(
@@ -419,6 +432,17 @@ def main(argv=None):
 
             os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())  # so the exit flush cannot fail again
             return 0
+    elif a.cmd == "compare":
+        from . import compare
+
+        try:
+            cmp = compare.compare(a.a, a.b)
+        except (FileNotFoundError, ValueError) as exc:
+            sys.exit(str(exc))
+        if a.json:
+            print(json.dumps(compare.jsonable(cmp), default=str, allow_nan=False, indent=2))
+        else:
+            print("\n".join(compare.lines(cmp)))
     return 0
 
 

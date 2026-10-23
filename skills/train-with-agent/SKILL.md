@@ -73,5 +73,6 @@ Keep test data and labels out of the training process, evaluate the final checkp
    `opal broker <folder> --ssh <user@gpu-host> --backend claude --keep-serving` on the laptop or login node.
 10. Tell the user: where records go (`opal_runs/<time>-<pid>-<random>/`), `report.html` there (rewritten after each
    decision), `opal show <run>` for one line per decision, `opal watch <run>` to print events as they are written,
-   `opal report <run>` to rewrite the page, `opal say <run> "..."` to leave a note for the agent, and that the
-   agent's code runs inside their training process.
+   `opal report <run>` to rewrite the page, `opal compare <a> <b>` to set two runs or two result.json files beside
+   each other, `opal say <run> "..."` to leave a note for the agent, and that the agent's code runs inside their
+   training process.

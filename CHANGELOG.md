@@ -5,6 +5,8 @@
 - `opal watch <run>` prints a run's events as they are written and returns when the run finishes. `--timeout 0`
   prints what is already there; a positive `--timeout` is idle seconds after the last new event. A run killed without
   `close()` (SIGTERM, SIGKILL, out of memory) never writes its end, so it needs `--timeout`; watch then exits with 1.
+- `opal compare a b` prints two run folders, or two result.json files, side by side: metric, command, decision counts,
+  cost, waiting, last training loss, and the decisions that differ, matched by the update they were asked at.
 
 ## 0.3.7 (2026-10-22)
 
