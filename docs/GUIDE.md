@@ -13,8 +13,10 @@ decision and at the end of the run.
 `opal show <folder>` prints one line per decision: when it was asked, what happened, its time and cost, and the start
 of the rationale. `opal watch <folder>` prints each event as `events.jsonl` grows, and returns when the run finishes.
 A run killed without `close()` (SIGTERM, SIGKILL, out of memory) never writes its end, so give it `--timeout`.
-`--timeout 0` prints what is already there. `opal report <folder>` rebuilds the page at any time. Every program
-version is in `programs/`. Each decision's message and answer are in `decisions/`. Events are in `events.jsonl`.
+`--timeout 0` prints what is already there. `opal report <folder>` rebuilds the page at any time. `opal compare a b`
+sets two run folders, or two `result.json` files, beside each other: metric, command, decision counts, cost, waiting,
+and the decisions that differ, matched by the update they were asked at. Every program version is in `programs/`.
+Each decision's message and answer are in `decisions/`. Events are in `events.jsonl`.
 
 ## How it works
 
@@ -345,7 +347,10 @@ Every example script with `--opal` can write a result.json with `--out <file>`.
 The first fields are shared: metric name, value and direction, training and waiting time, agent cost, decisions
 asked, applied and failed, hardware, OPAL commit, full command and run folder. Plain runs have the same fields with
 the OPAL fields empty. `--save <folder>` writes `model.pt` and, for scripts that keep an EMA, `ema.pt`.
-Compare two result.json files by their metric and command. Read the decisions with `opal show <run folder>`.
+`opal compare a b` sets two result.json files, or two run folders, beside each other. It prints the metric and
+command, decision counts, cost and waiting and, when both run folders are on this machine, the decisions that differ,
+matched by the update they were asked at. `--json` prints the two summaries and the differing decisions as JSON.
+Read one run with `opal show <run folder>`.
 
 Our run folders are not published. `opal.replay("<run folder>", optimizer, model, total_steps=...)` reruns the final
 program of one of your own runs in place of `opal.wrap(...)`. It runs the version named by `FINAL` deterministically.
