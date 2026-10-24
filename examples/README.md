@@ -12,7 +12,7 @@ paused at each decision while the agent answered, which is OPAL's default.
 
 | Example | Measure | Official recipe | Reactive optimizer | Made with |
 |---|---|---|---|---|
-| [SiT-B/2](sit_b2/), ImageNet 256, 400K updates, 8× H100 | FID-50K ↓ | 35.7 with our evaluator (the SiT paper reports 33.0 with the ADM evaluator; Muon: 30.3) | 23.6 | earlier harness |
+| [SiT-B/2](sit_b2/), ImageNet 256, 400K updates, 8× H100 | FID-50K ↓ | 35.7 with the ADM evaluator (the SiT paper reports 33.0; Muon: 30.4) | 23.6 | earlier harness |
 | [RAEv2-B](raev2_b/), ImageNet 256, 20 epochs, 8× H100 | FID-50K ↓ | 3.39 | 3.19 | OPAL 0.3 |
 | [Goldfish 125M GPT](goldfish_swahili/), 1 GB of Swahili, 1× H100 | FLORES-200 bits ↓ | 79.37 | 77.25 | OPAL 0.3 |
 | [modded-nanogpt record #36](modded_nanogpt/), 162M GPT, 8× H100 | validation loss ↓ | 3.2781 | 3.2749 (a small gain: the track assumes σ = 0.0013 per run) | OPAL 0.1.0 |

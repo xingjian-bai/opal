@@ -122,7 +122,7 @@ Each number is one run, and each agent started from the task's own recipe:
 
 | Example | Measure | Official recipe | Reactive optimizer |
 |---|---|---|---|
-| SiT-B/2, ImageNet 256, 400K updates | FID-50K ↓ | 35.7 (our evaluator) | 23.6 |
+| SiT-B/2, ImageNet 256, 400K updates | FID-50K ↓ | 35.7 (ADM evaluator; the SiT paper reports 33.0) | 23.6 |
 | RAEv2-B, ImageNet 256, 20 epochs | FID-50K ↓ | 3.39 | 3.19 |
 | Goldfish 125M GPT, Swahili | FLORES-200 bits ↓ | 79.37 | 77.25 |
 | modded-nanogpt record #36 | validation loss ↓ | 3.2781 | 3.2749 |

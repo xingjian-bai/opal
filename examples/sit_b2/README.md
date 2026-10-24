@@ -6,7 +6,7 @@ The score is FID-50K of samples from the EMA weights, without guidance.
 
 | FID-50K ↓ (one run each) | Official AdamW | Muon | Reactive optimizer |
 |---|---|---|---|
-| at 400K updates | 35.68 | 30.29 | **23.64** |
+| at 400K updates, ADM evaluator | 35.70 | 30.39 | **23.55** |
 
 The numbers above come from the earlier training system OPAL grew from in October 2026.
 A training-side host connected to a broker running Claude Code, Opus 5.5 at effort `high`, with that system's prompt.
@@ -71,6 +71,8 @@ working directory; `opal report` turns them into one page.
 | Training loop time | 7.1 h | 13.0 h | 11.2 h, of which 1.05 h waiting for the agent |
 | Agent cost | – | – | $11.28 |
 | FID-50K at 400K | 35.684 | 30.290 | 23.643 |
+| FID-50K at 400K, ADM evaluator | 35.70 | 30.39 | 23.55 |
+| sFID / IS / precision / recall, ADM evaluator | 6.57 / 42.0 / 0.52 / 0.65 | 5.94 / 47.4 / 0.56 / 0.64 | 5.85 / 60.6 / 0.59 / 0.64 |
 
 Our runs used a modified upstream `train.py`. It precomputed the centre crop and flip's latent posterior mean and
 standard deviation, then drew a fresh sample at every update, as upstream does with on-the-fly encoding.
@@ -79,7 +81,9 @@ in this repository.
 
 We evaluated 50,000 samples from the EMA weights with upstream's SDE sampler, Euler–Maruyama, 250 steps, no guidance
 and seed 7. FID used torch-fidelity's Inception-v3 compat mode against JiT's `jit_in256_stats.npz`, described above.
-The SiT paper uses the ADM evaluator and reports 33.0 for SiT-B/2 at 400K. That figure uses a different evaluator.
+The SiT paper uses the ADM evaluator and reports 33.0 for SiT-B/2 at 400K. We also scored a second set of 50,000
+samples per run with it (reference `VIRTUAL_imagenet256_labeled.npz`): the ADM rows above. On those samples our
+evaluator gives 35.67, 30.37 and 23.55.
 
 Our Muon baseline used momentum 0.95, Nesterov, 5 Newton–Schulz steps and update scale 0.2·√max(m, n) on matrices.
 AdamW handled the rest. Learning rate was 1e-4 and weight decay 0. Neither baseline was tuned.
