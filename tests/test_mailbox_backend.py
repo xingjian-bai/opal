@@ -47,11 +47,51 @@ def mailbox_for(tmp_path, box, name="run", **kw):
     return mb
 
 
+class _Stop(BaseException):
+    """Raised in a broker thread of serve() when its test ends: run_broker has no stop of its own (its process ends)."""
+
+
+_started = []  # the broker threads serve() started in the current test
+
+
+def _stoppable(real):
+    def call(*args, **kwargs):
+        if getattr(threading.current_thread(), "stopping", False):
+            raise _Stop
+        return real(*args, **kwargs)
+
+    return call
+
+
+@pytest.fixture(autouse=True)
+def no_broker_outlives_its_test(monkeypatch):
+    """Stop every broker of serve() when its test ends, and wait for it and its heartbeat and cancel-watch threads. A
+    broker left running keeps polling the module, so it called the fake _pending, _answer_request and lease that tests
+    run later in the same process monkeypatch (test_review_035c.py drives _serve with them), and failed them."""
+    for name in ("_pick_run", "_pending"):  # each turn of a broker's loop calls one of them
+        monkeypatch.setattr(mailbox, name, _stoppable(getattr(mailbox, name)))
+    _started.clear()
+    yield
+    for t in _started:
+        t.stopping = True
+    end = time.time() + 30
+    for t in _started:
+        t.join(max(0.0, end - time.time()))
+
+    def left():
+        return [t.name for t in threading.enumerate() if t in _started or t.name.startswith("opal-broker-")]
+
+    while left() and time.time() < end:
+        time.sleep(0.05)
+    assert not left(), f"broker threads outlived their test: {left()}"
+
+
 def serve(box, backend, work, **kw):
-    """run_broker in a daemon thread; the thread's .error holds what it raised."""
+    """run_broker in a daemon thread; the thread's .error holds what it raised. It stops when its test ends."""
     kw = {**dict(poll=0.1, log=lambda m: None), **kw}
     t = threading.Thread(target=lambda: _catch(t, run_broker, str(box), backend, work, **kw), daemon=True)
     t.error = None
+    _started.append(t)
     t.start()
     return t
 
