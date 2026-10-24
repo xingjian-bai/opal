@@ -250,9 +250,9 @@ def test_release_version_and_provenance_are_consistent(monkeypatch):
     from opal import results
     import subprocess
 
-    assert opal.__version__ == importlib.metadata.version("opal-optimizer") == "0.3.7"
+    assert opal.__version__ == importlib.metadata.version("opal-optimizer") == "0.3.8"
     monkeypatch.setattr(subprocess, "run", lambda *a, **kw: subprocess.CompletedProcess(a, 1))
-    assert results.opal_commit() == "0.3.7"
+    assert results.opal_commit() == "0.3.8"
 
 
 def test_truncated_loss_window_start_tracks_retained_values_between_decisions(tmp_path):
@@ -514,7 +514,7 @@ def test_codex_errors_and_client_version_use_release_contract(tmp_path):
         assert secret not in recorded
     calls = [json.loads(line) for line in (tmp_path / "provider/calls.jsonl").read_text().splitlines()]
     initialize = next(call for call in calls if call["method"] == "initialize")
-    assert initialize["params"]["clientInfo"]["version"] == opal.__version__ == "0.3.7"
+    assert initialize["params"]["clientInfo"]["version"] == opal.__version__ == "0.3.8"
 
 
 def test_later_nonplain_agent_state_is_omitted_before_weights_only_checkpoint(tmp_path):

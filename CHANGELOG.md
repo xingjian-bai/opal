@@ -1,12 +1,20 @@
 # Changelog
 
-## Unreleased
+## 0.3.8 (2026-10-24)
 
+- Two new read-only commands (#7, #8, by @mvanhorn) and one fix for the ssh mailbox; the optimizer math, the agent prompt and the agent's tools are unchanged.
 - `opal watch <run>` prints a run's events as they are written and returns when the run finishes. `--timeout 0`
   prints what is already there; a positive `--timeout` is idle seconds after the last new event. A run killed without
   `close()` (SIGTERM, SIGKILL, out of memory) never writes its end, so it needs `--timeout`; watch then exits with 1.
 - `opal compare a b` prints two run folders, or two result.json files, side by side: metric, command, decision counts,
   cost, waiting, last training loss, and the decisions that differ, matched by the update they were asked at.
+  A result.json whose `opal_run` is relative to where training ran is matched to the run folder beside it.
+- The ssh mailbox lists its folder in `sh` rather than the remote login shell, so an empty mailbox on a host whose
+  login shell is zsh (such as macOS) no longer fails with "no matches found: */".
+- SiT-B/2 is also scored with the ADM evaluator, the one the SiT paper uses: FID-50K 35.70 (AdamW), 30.39 (Muon),
+  23.55 (OPAL).
+- CONTRIBUTING.md says how pull requests are reviewed and merged.
+- The mailbox tests stop their brokers when each test ends; a left-over broker made a later test fail now and then.
 
 ## 0.3.7 (2026-10-22)
 

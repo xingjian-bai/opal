@@ -201,7 +201,7 @@ Code CLI against a local mock.
 
 ## Status and limitations
 
-v0.3.7, under active development. Tested on one GPU and on DDP within one node (NCCL, eager and `torch.compile`).
+v0.3.8, under active development. Tested on one GPU and on DDP within one node (NCCL, eager and `torch.compile`).
 Multi-node, FSDP and DeepSpeed are not supported. Accelerate works if you wrap after `accelerator.prepare`, without
 fp16 GradScaler or Accelerate's gradient accumulation; the HF Trainer works through `opal.hf.OpalTrainer`. Both are
 tested on CPU. Lightning should work through `opt.observe(loss)` but we have not tried it. The agent can make a run
