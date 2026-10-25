@@ -28,7 +28,7 @@ LightningDiT-B/1 has no folder here. Both runs used the upstream LightningDiT tr
 ## Training without waiting for the agent
 
 With `blocking=False`, training continues on the current programs while the agent answers, and an edit takes effect
-when its answer arrives. One run on RAEv2-B, OPAL 0.3, 8× H100:
+when its answer arrives. One run per setting, OPAL 0.3. RAEv2-B, 8× H100:
 
 | RAEv2-B, 20 epochs | Official recipe | OPAL, training waits (default) | OPAL, `blocking=False` |
 |---|---|---|---|
@@ -36,6 +36,17 @@ when its answer arrives. One run on RAEv2-B, OPAL 0.3, 8× H100:
 | Run time, including evaluations | 3.21 h | 3.75 h, of which 0.49 h waiting for the agent | 3.22 h |
 | Decisions asked / that changed code | – | 50 / 6 | 43 / 3 |
 | Agent cost | – | $13.30 | $9.71 |
+
+LightningDiT-B/1, with the recipe and evaluation above. The first two runs used 8× H100. The `blocking=False` run was
+interrupted after update 160,000 and resumed from its checkpoint at that update, in the same agent conversation, on
+8× A100 80GB for the last 40,000 updates:
+
+| LightningDiT-B/1, 160 epochs | Official recipe | OPAL, training waits (default) | OPAL, `blocking=False` |
+|---|---|---|---|
+| FID-50K ↓ after 200,000 updates, with guidance / without | 3.22 / 10.12 | 2.31 / 7.56 | 2.65 / 8.83 |
+| Training time | 4.62 h | 6.13 h, of which 0.66 h waiting for the agent | 4.52 h to update 160,000 on H100, then 2.23 h on A100 |
+| Decisions asked / that changed code | – | 50 / 13 | 47 / 11 |
+| Agent cost | – | $15.19 | $17.25 |
 
 Without waiting, fewer decisions are asked, because no new decision is asked while one is in progress.
 
