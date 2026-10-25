@@ -139,7 +139,7 @@ so the waiting adds up to a roughly fixed cost. In our runs of several hours it 
 set 50 decisions, took 27 to 31 min with the agent against 1 to 3 min without, and with `blocking=False` they ended
 before the first answer arrived. The small scripts are a quick way to try OPAL. If you have the compute, use it on runs
 of a few hours or more, where `blocking=False` also
-[kept the result](https://github.com/xingjian-bai/opal/blob/main/examples/README.md#training-without-waiting-for-the-agent).
+[beat the official recipe](https://github.com/xingjian-bai/opal/blob/main/examples/README.md#training-without-waiting-for-the-agent).
 
 Our run records and final weights are on Hugging Face: [snow-leopard/opal-results](https://huggingface.co/datasets/snow-leopard/opal-results).
 
