@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.9 (2026-10-29)
+
+- Documentation only; the code is unchanged apart from the version number.
+- The README cites the arXiv paper ([arXiv:2610.33826](https://arxiv.org/abs/2610.33826)) and links it on arXiv and alphaXiv.
+- The examples page adds the LightningDiT-B/1 run with `blocking=False`: FID-50K 2.65 with guidance and 8.83 without,
+  against 3.22 / 10.12 for the official recipe and 2.31 / 7.56 when training waits for the agent.
+
 ## 0.3.8 (2026-10-24)
 
 - Two new read-only commands (#7, #8, by @mvanhorn) and one fix for the ssh mailbox; the optimizer math, the agent prompt and the agent's tools are unchanged.
