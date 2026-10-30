@@ -60,9 +60,9 @@ def test_the_agent_never_sees_test_metrics(tmp_path, setting):
         for r in evals:
             assert repr(r["test_loss"]) not in text and repr(r["test_acc"]) not in text
     # positive control: the validation measurements do reach the agent
-    assert all(set(m) <= {"update", "dev_loss", "dev_accuracy"} for m in seen)
-    assert any(m["dev_loss"] == pytest.approx(evals[-2]["dev_loss"]) for m in seen)
-    assert json.loads(inbox[-1])["development"][0]["loss"] == pytest.approx(evals[0]["dev_loss"])
+    assert all(set(m) <= {"update", "val_loss", "val_accuracy"} for m in seen)
+    assert any(m["val_loss"] == pytest.approx(evals[-2]["dev_loss"]) for m in seen)
+    assert json.loads(inbox[-1])["validation"][0]["loss"] == pytest.approx(evals[0]["dev_loss"])
     assert f"{evals[0]['update']}: {evals[0]['dev_loss']:.4g}, {evals[0]['dev_acc']:.4g}" in messages[-1]
     system = (run / "system.md").read_text()
     n = records().eval_interval(per_epoch, 3)
@@ -78,8 +78,8 @@ def test_static_run_and_no_dev_shown_without_validation(tmp_path):
         SMOKE + ["--setting", "small20", "--opal", "--decisions", "3", "--every", "2", "--out", str(tmp_path / "nodev")],
         backend=lambda ws, msg, system: messages.append(msg) or "kept",
     )
-    assert messages and not any("Development set" in m or "dev_" in m for m in messages)
-    assert "development set" not in (tmp_path / "nodev" / "opal" / "system.md").read_text()
+    assert messages and not any("Validation set" in m or "val_" in m or "dev_" in m for m in messages)
+    assert "validation set" not in (tmp_path / "nodev" / "opal" / "system.md").read_text()
 
 
 def test_the_files_the_agent_reads_say_nothing_about_the_experiment():

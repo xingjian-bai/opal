@@ -378,7 +378,7 @@ def run(tmp_path, program=None, steps=480, window=40, evals=None, subs=None, see
         sched.step()
         if u in evals:
             with torch.no_grad():
-                w.report_dev(loss=F.cross_entropy(model(dev_x), dev_y), update=u)
+                w.report_validation(loss=F.cross_entropy(model(dev_x), dev_y), update=u)
     w.close()
     events = [json.loads(line) for line in open(tmp_path / "r" / "events.jsonl")]
     return events, evals, w

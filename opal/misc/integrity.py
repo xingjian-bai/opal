@@ -12,7 +12,7 @@ view of its storage with a seeded offset (at most SAMPLE_PER_TENSOR entries, SAM
 torch.cat into a ring that holds the last BEFORE + AFTER + 2 updates. The views are made once and rebuilt only when a
 tensor's storage changes (p.data replaced).
 
-What is checked: report_dev opens a check for the update t whose parameters the script has just evaluated; AFTER
+What is checked: report_validation opens a check for the update t whose parameters the script has just evaluated; AFTER
 updates later the window [t - BEFORE - 1, t + AFTER] is read once to the host. Per tensor, d_j = s_j - s_(j-1) is the
 sampled change of update j and m_j = |d_j|. An update is a jump when m_j exceeds `threshold` times the tensor's typical
 change (the median of its non-zero m_j in the window, or 0 when fewer than MIN_MOVING are non-zero, as for a frozen

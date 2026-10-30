@@ -251,16 +251,16 @@ def previous_answer(prev, last=None):
     return f"Decision {k} (requested at update {r:,}, answered by update {u:,}): you kept the programs."
 
 
-DEV_SHOWN = 50  # validation measurements written into a message; all of them are in the inbox
+VALIDATION_SHOWN = 50  # validation measurements written into a message; all of them are in the inbox
 
 
-def development_line(k, dev) -> str:
-    """The validation-set history, oldest first: 'update: loss, accuracy' for the most recent DEV_SHOWN."""
-    head = "Development set (held out from training; not the test set in the goal)"
+def validation_line(k, dev) -> str:
+    """The validation-set history, oldest first: 'update: loss, accuracy' for the most recent VALIDATION_SHOWN."""
+    head = "Validation set (held out from training; not the test set in the goal)"
     if not dev:
         return head + ": no measurement yet."
     keys = [x for x in ("loss", "accuracy") if any(x in d for d in dev)]
-    shown = dev[-DEV_SHOWN:]
+    shown = dev[-VALIDATION_SHOWN:]
     which = (
         f"all {len(dev)} measurements so far"
         if len(shown) == len(dev)
@@ -306,8 +306,8 @@ def format_message(k, req) -> str:
         )
     else:
         lines.append("No training loss was passed to step(loss=...) since your previous decision.")
-    if "development" in req:  # wrap(validation=N): OPAL 0.1.1-validation
-        lines.append(development_line(k, req["development"]))
+    if "validation" in req:  # wrap(validation=N): OPAL 0.1.1-validation
+        lines.append(validation_line(k, req["validation"]))
     reports = req["inbox"]["reports"]
     made = max(req["inbox"].get("reports_made", len(reports)), len(reports))
     lines.append(

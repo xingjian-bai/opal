@@ -270,7 +270,7 @@ EVALUATION_OFF = (
     "which then appears in obs.metrics and in the\ndecision message; do not look for them elsewhere."
 )  # the v0.1.1 sentence, line breaks included, so the prompt is unchanged with the option off
 EVALUATION_ON = (
-    "Evaluation data are not shown to you, nor are\nthe test results. The development-set loss and accuracy, and any "
+    "Evaluation data are not shown to you, nor are\nthe test results. The validation-set loss and accuracy, and any "
     "other value the person running the training\nchose to show, appear in obs.metrics and in the decision message; "
     "do not look for them elsewhere."
 )
@@ -283,7 +283,7 @@ def validation_note(every=None, size=None) -> str:
         return ""
     of = f" of {_v(size)}" if size is not None else ""
     return (
-        f" The training script evaluates the model on a development set{of} held out from training about every "
+        f" The training script evaluates the model on a validation set{of} held out from training about every "
         f"{every:,} updates, at times that are not announced, and shows you its loss, and its accuracy when the "
         "script reports one. The performance in the goal is measured on a separate test set that you never see."
     )

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.10 (2026-10-30)
+
+- "Development set" is now "validation set" everywhere, including the text the agent reads: the TASK sentences of the
+  neutral prompt and the history line in each decision message ("Validation set (held out from training; not the test
+  set in the goal)"). Runs before 0.3.10 were told "development set". Nothing else in the prompt changes.
+- `opt.report_validation(loss=..., accuracy=...)` replaces `opt.report_dev`, which still works. The agent sees the
+  values in `obs.metrics` as `val_loss` and `val_accuracy`, and their history under `validation` in its inbox. Programs
+  that read `dev_loss` and `dev_accuracy` still find them under those names.
+- The optimizer math and the agent's tools are unchanged.
+
 ## 0.3.9 (2026-10-29)
 
 - Documentation only; the code is unchanged apart from the version number.

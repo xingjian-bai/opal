@@ -616,16 +616,18 @@ symbolic links, so a workspace link cannot bring a file into the agent's folder.
 Read `programs/` before trusting a result.
 
 With `wrap(..., validation=N)`, added in OPAL 0.1.1-validation, your script evaluates a held-out validation set
-about every N updates at unannounced times. Report it with `opt.report_dev(loss=..., accuracy=...)`.
+about every N updates at unannounced times. Report it with `opt.report_validation(loss=..., accuracy=...)`
+(`opt.report_dev`, its name before 0.3.10, still works).
 `validation_size="5,000 images"` can name its size.
-The agent sees each value in `obs.metrics` as `dev_loss` and `dev_accuracy`.
+The agent sees each value in `obs.metrics` as `val_loss` and `val_accuracy`.
+Programs written before 0.3.10 that read `dev_loss` and `dev_accuracy` still find them under those names.
 Each decision message has a validation-set line with the history:
-"Development set (held out from training; not the test set in the goal), ...".
+"Validation set (held out from training; not the test set in the goal), ...".
 Every measurement is in the inbox.
 
 With the neutral prompt, two sentences in TASK state the evaluation and the separate, unseen test set.
 The evaluation-data sentence says validation values are shown. Nothing else changes.
-With the default `validation=None`, neither sentence appears and `report_dev` only records.
+With the default `validation=None`, neither sentence appears and `report_validation` only records.
 `validation=N` is your promise of cadence and irregular times. OPAL does not run evaluation.
 It warns you once, without telling the agent, if the last three evaluations were equally spaced or if their average
 frequency differs greatly from every N updates. The agent sees each measurement's update and could predict the next.
@@ -644,7 +646,7 @@ It is on by default with `validation=N`. Set `True` or `False` to choose.
 After every update, rank 0 copies a fixed sample of each parameter tensor's entries, at most 32K entries in all.
 One `torch.cat` writes into a ring of 138 updates on the device, with no host synchronisation.
 For a ResNet-18, this costs about 0.04 ms per update on CPU and 0.16 ms on Apple MPS.
-Eight updates after each `report_dev`, it reads that window once.
+Eight updates after each `report_validation`, it reads that window once.
 
 A tensor is flagged when its last unusually large change at or before evaluation is undone by its first unusually
 large change after evaluation, with ordinary updates on either side.
@@ -660,7 +662,7 @@ It misses changes no larger than about five ordinary updates of that tensor.
 Early in training, a small probe can hide in training's own motion.
 A program undoing its own update on the next one looks the same if evaluation falls between them.
 Read `programs/` before trusting a flag or its absence.
-Call `report_dev` right after evaluating parameters as the latest update left them.
+Call `report_validation` right after evaluating parameters as the latest update left them.
 Your script's own EMA swap around evaluation happens outside the updater and is not attributed to the program.
 
 Accelerate and HF Trainer have CPU tests, as described above. Lightning has no test yet.

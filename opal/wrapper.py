@@ -158,7 +158,7 @@ def wrap(optimizer, model, *, total_steps, goal, scheduler=None, decisions=None,
     snapshot_limit_gb (2.0: largest CPU copy kept to undo a failing update exactly).
     validation       OPAL 0.1.1-validation: N (an int) means the training script evaluates the model on a
                      validation set held out from training about every N updates, at times it does not announce, and
-                     reports it with opt.report_dev(loss=..., accuracy=...). The agent sees every measurement
+                     reports it with opt.report_validation(loss=..., accuracy=...). The agent sees every measurement
                      (obs.metrics, and a line with their history in each decision message) and the neutral prompt says
                      so in its TASK paragraph ("about every N updates, at times that are not announced");
                      validation_size (e.g. "5,000 images") names the set's size there. None (default): off, and the
@@ -220,6 +220,25 @@ def _reasons_shown(reasons):
     room = MAX_REASONS - len(keep)
     shown = keep + (wakes[-room:] if room > 0 else [])
     return shown + [f"{len(wakes) - max(room, 0)} earlier requests from your analysis, not listed"]
+
+
+class _ValidationAliases(dict):
+    """An obs.metrics entry. Before 0.3.10 the validation values were named dev_loss and dev_accuracy; programs written
+    then still find them under those names. The entry holds, prints and serializes only the val_ names."""
+
+    def _key(self, k):
+        if isinstance(k, str) and k.startswith("dev_") and not dict.__contains__(self, k):
+            return "val_" + k[4:]
+        return k
+
+    def __getitem__(self, k):
+        return dict.__getitem__(self, self._key(k))
+
+    def get(self, k, default=None):
+        return dict.get(self, self._key(k), default)
+
+    def __contains__(self, k):
+        return dict.__contains__(self, self._key(k))
 
 
 def _plain_json(obj, bad, depth=0):
@@ -1285,7 +1304,7 @@ class AgentOptimizer(
                 params={n: p for n, p in self.named},
                 grads={n: p.grad for n, p in self.named},
                 updater=self.updater,
-                metrics=self._analysis_metrics,
+                metrics=[_ValidationAliases(m) for m in self._analysis_metrics],
                 program_ms_per_update=self._timing["program_ms"],
                 wall_ms_per_update=self._timing["wall_ms_per_update"],
                 activations=self.activations,
@@ -1370,7 +1389,7 @@ class AgentOptimizer(
             metrics=self._metrics_since(consume=True),
             skipped=list(self._skipped),
             timing=dict(self._timing, t=None),
-            **({"development": list(self._dev)} if self._validation else {}),
+            **({"validation": list(self._dev)} if self._validation else {}),
         )
         notes = self.run.new_notes()
         if self._resume_note:
@@ -1398,7 +1417,7 @@ class AgentOptimizer(
             **({"neutral": True} if self._neutral else {}),
             **({"aggressive": True} if self._aggressive else {}),
             **({"epochs": self._run_facts["epochs"]} if isinstance(self._run_facts["epochs"], (int, float)) else {}),
-            **({"development": list(self._dev)} if self._validation else {}),
+            **({"validation": list(self._dev)} if self._validation else {}),
             shared_code=self._share_code,
             script_shared=getattr(self, "_script_copied", False),
             cost_so_far=self.worker.cost,
@@ -1494,10 +1513,10 @@ class AgentOptimizer(
             if len(self.metrics) > 1000:
                 self.metrics = self.metrics[-1000:]
 
-    def report_dev(self, loss=None, accuracy=None, update=None):
+    def report_validation(self, loss=None, accuracy=None, update=None):
         """OPAL 0.1.1-validation: report one evaluation on the validation set (held out from training; never the
-        test set the run is judged by). With wrap(validation=N) the agent sees it in obs.metrics (as dev_loss and
-        dev_accuracy) and, with the history of earlier measurements, in each decision message; it is also kept in
+        test set the run is judged by). With wrap(validation=N) the agent sees it in obs.metrics (as val_loss and
+        val_accuracy) and, with the history of earlier measurements, in each decision message; it is also kept in
         metrics.jsonl. Without validation= it is only recorded. update defaults to the number of updates applied so
         far. Values are read on the host here (a validation evaluation synchronises anyway). Rank 0 only.
 
@@ -1511,9 +1530,9 @@ class AgentOptimizer(
         for key, v in (("loss", loss), ("accuracy", accuracy)):
             if v is not None:
                 rec[key] = float(v.detach().float().mean()) if torch.is_tensor(v) else float(v)
-        shown = dict(update=rec["update"], **{f"dev_{k}": v for k, v in rec.items() if k != "update"})
+        shown = dict(update=rec["update"], **{f"val_{k}": v for k, v in rec.items() if k != "update"})
         if not self._validation:
-            self._warn("dev-off", "opt.report_dev without wrap(validation=N): recorded only; the agent does not see it")
+            self._warn("validation-off", "opt.report_validation without wrap(validation=N): recorded only; the agent does not see it")
             self.log(**{k: v for k, v in shown.items() if k != "update"})
             return
         if self._closed:
@@ -1522,8 +1541,8 @@ class AgentOptimizer(
         gaps = [b["update"] - a["update"] for a, b in zip(self._dev[-3:], self._dev[-2:] + [rec])]
         if len(gaps) == 3 and len(set(gaps)) == 1:
             self._warn(
-                "dev-regular",
-                f"opt.report_dev: the last three evaluations were {gaps[0]} updates apart; the agent is told the "
+                "validation-regular",
+                f"opt.report_validation: the last three evaluations were {gaps[0]} updates apart; the agent is told the "
                 f"script evaluates about every {self._validation} updates at times that are not announced, and it sees "
                 "the update of each measurement, so regular times let it predict the next one (draw each time at "
                 "random, as examples/overfit does)",
@@ -1531,14 +1550,18 @@ class AgentOptimizer(
         mean_gap = (rec["update"] - self._dev[0]["update"]) / len(self._dev) if self._dev else None
         if len(self._dev) >= 4 and not 0.5 <= mean_gap / self._validation <= 2:
             self._warn(
-                "dev-interval",
-                f"opt.report_dev: {len(self._dev) + 1} evaluations from update {self._dev[0]['update']} to "
+                "validation-interval",
+                f"opt.report_validation: {len(self._dev) + 1} evaluations from update {self._dev[0]['update']} to "
                 f"{rec['update']}; the agent is told the script evaluates about every {self._validation} updates "
                 "(wrap(validation=N) is your promise of that: OPAL does not run the evaluation)",
             )
         self._dev.append(rec)
         self._metrics_new.append(dict(shown))
         self._shown_new.append(dict(shown))
+
+    def report_dev(self, loss=None, accuracy=None, update=None):
+        """The name of report_validation before 0.3.10; kept so that existing scripts keep working."""
+        return self.report_validation(loss=loss, accuracy=accuracy, update=update)
 
     # ----- evaluation integrity (misc/integrity.py; rank 0; the agent is not told) ------------------------------
 

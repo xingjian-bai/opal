@@ -168,7 +168,7 @@ Our run records and final weights are on Hugging Face: [snow-leopard/opal-result
 - **What the agent sees.** Your goal sentence, the names and shapes of the parameters, the training losses, its own
   analysis reports, and read-only copies of your training script and model code (`share_code=False` keeps them out).
   Values you log are only recorded, unless you pass `show_agent=True`. With `validation=N` it also sees the
-  validation-set values you report with `opt.report_dev(...)`.
+  validation-set values you report with `opt.report_validation(...)`.
 
 ## Options
 
@@ -180,7 +180,7 @@ Our run records and final weights are on Hugging Face: [snow-leopard/opal-result
 | `max_cost_usd` | none | Stop asking the agent once it has spent this much. |
 | `backend_options` | `{}` | `model=` (default `claude-opus-5-5`), `effort=` (default `high`) and `timeout=`. A failed agent turn is retried with growing pauses; an agent that is unavailable (login, usage limit, outage) is waited for, with no deadline unless you set `unavailable_timeout=`. Details in the [guide](https://github.com/xingjian-bai/opal/blob/main/docs/GUIDE.md#cost-and-limits). |
 | `prompt` | `"neutral"` | The agent's instructions: the facts of the run and the protocol, with no recommended values. `"aggressive"` adds a review of every group's hyperparameters at each decision. You can also pass the path of your own template. |
-| `validation` | none | `N`: your script evaluates a held-out validation set about every N updates, at times it does not announce, and reports it with `opt.report_dev(loss=..., accuracy=...)`. The agent sees each result. See the [guide](https://github.com/xingjian-bai/opal/blob/main/docs/GUIDE.md#what-it-can-and-cannot-change). |
+| `validation` | none | `N`: your script evaluates a held-out validation set about every N updates, at times it does not announce, and reports it with `opt.report_validation(loss=..., accuracy=...)`. The agent sees each result. See the [guide](https://github.com/xingjian-bai/opal/blob/main/docs/GUIDE.md#what-it-can-and-cannot-change). |
 | `eval_integrity` | on with `validation` | Flags a run whose program moves the parameters somewhere else for an evaluation and back afterwards. The agent is not told. |
 
 Gradient accumulation, GradScaler, checkpoints and resume, DDP, GPU machines without internet, privacy and cost are
@@ -203,7 +203,7 @@ Code CLI against a local mock.
 
 ## Status and limitations
 
-v0.3.9, under active development. Tested on one GPU and on DDP within one node (NCCL, eager and `torch.compile`).
+v0.3.10, under active development. Tested on one GPU and on DDP within one node (NCCL, eager and `torch.compile`).
 Multi-node, FSDP and DeepSpeed are not supported. Accelerate works if you wrap after `accelerator.prepare`, without
 fp16 GradScaler or Accelerate's gradient accumulation; the HF Trainer works through `opal.hf.OpalTrainer`. Both are
 tested on CPU. Lightning should work through `opt.observe(loss)` but we have not tried it. The agent can make a run

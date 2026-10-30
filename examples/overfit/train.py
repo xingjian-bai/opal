@@ -259,7 +259,7 @@ def main(argv=None, backend=None):
                 continue
             dev_loss, dev_acc = scores(dev_x, dev_y)
             if a.validation:
-                opt.report_dev(loss=dev_loss, accuracy=dev_acc, update=u)  # after the last update: recorded only
+                opt.report_validation(loss=dev_loss, accuracy=dev_acc, update=u)  # after the last update: recorded only
             rec = dict(
                 kind="eval",
                 update=u,

@@ -150,7 +150,7 @@ def run_probe(mod, out, opal, deferred, augment, monkeypatch, data_args=None):
             for report in rec.get("reports", []):
                 report["report"].pop("program_ms_per_update", None)
             observations.append({k: rec.get(k) for k in
-                                 ("update", "losses", "losses_from", "reports", "metrics", "development")})
+                                 ("update", "losses", "losses_from", "reports", "metrics", "validation")})
         assert observations
     return dict(loss_bytes=b"".join(losses).hex(), loss_sha256=hashlib.sha256(b"".join(losses)).hexdigest(),
                 updates=len(losses), parameter_sha256=tensor_hash(model.named_parameters()),
