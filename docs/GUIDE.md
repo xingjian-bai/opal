@@ -615,16 +615,16 @@ The sandbox stops the agent's shell from reading the run folder. Program files a
 symbolic links, so a workspace link cannot bring a file into the agent's folder.
 Read `programs/` before trusting a result.
 
-With `wrap(..., validation=N)`, added in OPAL 0.1.1-validation, your script evaluates a held-out development set
+With `wrap(..., validation=N)`, added in OPAL 0.1.1-validation, your script evaluates a held-out validation set
 about every N updates at unannounced times. Report it with `opt.report_dev(loss=..., accuracy=...)`.
 `validation_size="5,000 images"` can name its size.
 The agent sees each value in `obs.metrics` as `dev_loss` and `dev_accuracy`.
-Each decision message has a development-set line with the history:
+Each decision message has a validation-set line with the history:
 "Development set (held out from training; not the test set in the goal), ...".
 Every measurement is in the inbox.
 
 With the neutral prompt, two sentences in TASK state the evaluation and the separate, unseen test set.
-The evaluation-data sentence says development values are shown. Nothing else changes.
+The evaluation-data sentence says validation values are shown. Nothing else changes.
 With the default `validation=None`, neither sentence appears and `report_dev` only records.
 `validation=N` is your promise of cadence and irregular times. OPAL does not run evaluation.
 It warns you once, without telling the agent, if the last three evaluations were equally spaced or if their average

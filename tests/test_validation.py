@@ -1,4 +1,4 @@
-"""OPAL 0.1.1-validation (wrap(validation=N), opt.report_dev): the agent sees the development set's loss and
+"""OPAL 0.1.1-validation (wrap(validation=N), opt.report_dev): the agent sees the validation set's loss and
 accuracy in obs.metrics and in each decision message; the neutral prompt says so only when the option is on, and is
 byte-identical to v0.1.1's with it off."""
 

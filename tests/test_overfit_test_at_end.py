@@ -146,7 +146,7 @@ def run_probe(mod, out, opal, deferred, augment, monkeypatch, data_args=None):
         for p in sorted((out / "opal/workspace/inbox").glob("*.json")):
             rec = json.loads(p.read_text())
             # Timing is also agent-visible, and cannot be identical between runs.
-            # Compare all numerical training/dev observations, excluding only clocks.
+            # Compare all numerical training/validation observations, excluding only clocks.
             for report in rec.get("reports", []):
                 report["report"].pop("program_ms_per_update", None)
             observations.append({k: rec.get(k) for k in

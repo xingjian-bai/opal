@@ -251,11 +251,11 @@ def previous_answer(prev, last=None):
     return f"Decision {k} (requested at update {r:,}, answered by update {u:,}): you kept the programs."
 
 
-DEV_SHOWN = 50  # development measurements written into a message; all of them are in the inbox
+DEV_SHOWN = 50  # validation measurements written into a message; all of them are in the inbox
 
 
 def development_line(k, dev) -> str:
-    """The development-set history, oldest first: 'update: loss, accuracy' for the most recent DEV_SHOWN."""
+    """The validation-set history, oldest first: 'update: loss, accuracy' for the most recent DEV_SHOWN."""
     head = "Development set (held out from training; not the test set in the goal)"
     if not dev:
         return head + ": no measurement yet."

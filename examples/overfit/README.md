@@ -2,10 +2,10 @@
 
 These CIFAR-10 runs overfit with static AdamW. They use the validation feature added in OPAL 0.1.1-validation.
 
-With static AdamW, development and test loss rise as accuracy peaks and falls.
-Does an agent shown development loss and accuracy through `wrap(validation=N)` keep this from happening?
-The baselines are static AdamW with learning rate swept on the development set, and early stopping on that set.
-The early-stopping score is test accuracy at the best development evaluation.
+With static AdamW, validation and test loss rise as accuracy peaks and falls.
+Does an agent shown validation loss and accuracy through `wrap(validation=N)` keep this from happening?
+The baselines are static AdamW with learning rate swept on the validation set, and early stopping on that set.
+The early-stopping score is test accuracy at the best validation evaluation.
 The script logs what is needed and saves `best.pt`.
 
 `examples/overfit/splits.py` defines two settings with the same splits and labels in every run:
@@ -14,13 +14,13 @@ The script logs what is needed and saves `best.pt`.
   Wrong labels are uniform over the other classes, with a fixed seed.
 - `small20`: 10,000 clean training images, 20% of CIFAR-10's training set, with 1,000 per class.
 
-Both hold out 5,000 clean development images, 10% of each class from the official training set.
+Both hold out 5,000 clean validation images, 10% of each class from the official training set.
 The official 10,000 test images are logged for us and never shown to the agent.
 
 The model is ResNet-18 with a CIFAR stem, batch norm and no dropout.
 `--width 64` gives 11.2M parameters. `--width 128` gives a wider model more prone to overfit.
 It normalises logits with centred LogitNorm, τ = 0.04, as in the blog's run.
-This prevents the agent from setting a temperature on the development set.
+This prevents the agent from setting a temperature on the validation set.
 Data augmentation is off by default. `--augment` adds flips and 4-pixel crops.
 
 AdamW uses `--lr`, betas (0.9, 0.999) and `--wd` weight decay on every tensor.
@@ -30,8 +30,8 @@ The schedule warms up linearly over `--warmup-epochs`, then decays to 0 with a c
 
     python examples/overfit/train.py --prepare-data                                   # download CIFAR-10 once
     python examples/overfit/train.py --setting label10 --lr 1e-3                      # static AdamW
-    python examples/overfit/train.py --setting label10 --opal --validation            # agent, sees the dev set
-    python examples/overfit/train.py --setting label10 --opal                         # agent, no dev set shown
+    python examples/overfit/train.py --setting label10 --opal --validation            # agent, sees the validation set
+    python examples/overfit/train.py --setting label10 --opal                         # agent, no validation set shown
     python examples/overfit/train.py --setting small20 --data synthetic --device cpu --width 4 --epochs 2 \
         --batch-size 64 --opal --validation --backend keep                            # CPU smoke test
 
@@ -54,13 +54,13 @@ The experiment's question, label10's wrong labels, test scores, early stopping a
 `splits.py` and `records.py`, which it does not see.
 The default output folder has a neutral name. The agent's working directory is inside it.
 
-`--out` contains `log.jsonl`, `result.json` and `best.pt`, the model with the best development accuracy.
+`--out` contains `log.jsonl`, `result.json` and `best.pt`, the model with the best validation accuracy.
 Agent runs also write `opal/`, the OPAL run folder.
 `log.jsonl` has a config line, one line per evaluation and a result line.
-Evaluation lines record training loss and accuracy since the previous evaluation, development and test loss and
+Evaluation lines record training loss and accuracy since the previous evaluation, validation and test loss and
 accuracy. For label10, they also count wrongly labelled training images predicted with their wrong or true label.
 
-In 0.2.2, development evaluation happens after one uniformly random update per epoch and after the last update.
+In 0.2.2, validation evaluation happens after one uniformly random update per epoch and after the last update.
 `--evals-per-epoch K` draws one in each K-th part of the epoch.
 `records.eval_updates` draws them from `--eval-seed`. The config line lists them as `eval_updates`.
 Test evaluation happens at the same updates, for us only.
@@ -74,9 +74,9 @@ and a weight average swapped in for each evaluation.
 
 With `--test-at-end`, prepare the CIFAR-10 cache separately using `--prepare-data`.
 Training reads only `x_train` and `y_train` from the NPZ cache. It loads and scores no test arrays.
-After the last update and `opt.close()`, it scores the final model and the models selected by development accuracy
+After the last update and `opt.close()`, it scores the final model and the models selected by validation accuracy
 and loss on the test set. Per-evaluation logs omit test scores.
 `result.json` keeps its keys, with `peak_test_acc_oracle` and `overfit_gap_test_acc` set to null.
-The two development-selected states stay in CPU memory even with `--no-save-best`.
+The two validation-selected states stay in CPU memory even with `--no-save-best`.
 The flag changes OPAL's timing observations and training-source copy.
 It does not sandbox agent programs or restrict filesystem access.

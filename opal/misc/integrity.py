@@ -1,4 +1,4 @@
-"""Evaluation integrity (0.2.2): does the running program move the parameters to another point for a development
+"""Evaluation integrity (0.2.2): does the running program move the parameters to another point for a validation
 evaluation and move them back after it?
 
 Two overfit runs did: one multiplied the classifier by a probe factor just before each evaluation and restored it at

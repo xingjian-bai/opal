@@ -402,7 +402,7 @@ def rank_flag(events) -> str:
 
 
 def integrity_flag(events) -> str:
-    """The banner of a run whose program moved the parameters for development evaluations and moved them back
+    """The banner of a run whose program moved the parameters for validation evaluations and moved them back
     (eval_integrity events, misc/integrity.py); empty otherwise."""
     found = [e for e in events if e.get("kind") == "eval_integrity" and e.get("flagged")]
     if not found:
@@ -427,7 +427,7 @@ def integrity_flag(events) -> str:
         items.append(f"update {_n(e.get('update'))}: {tensors or 'tensor details not recorded'}{more}")
     rest = f"; {len(found) - 6} more in events.jsonl" if len(found) > 6 else ""
     return (
-        f'<p class="flag"><b>Flagged: evaluation integrity.</b> At {len(found)} development evaluation'
+        f'<p class="flag"><b>Flagged: evaluation integrity.</b> At {len(found)} validation evaluation'
         f"{'s' if len(found) > 1 else ''} the program had moved parameters to another point and moved them back "
         f"after the evaluation, so those measurements do not describe the trained model: "
         + html.escape("; ".join(items) + rest)

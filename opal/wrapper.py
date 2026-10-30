@@ -157,7 +157,7 @@ def wrap(optimizer, model, *, total_steps, goal, scheduler=None, decisions=None,
     neutral prompt states in its TASK paragraph (a fact not given is left out),
     snapshot_limit_gb (2.0: largest CPU copy kept to undo a failing update exactly).
     validation       OPAL 0.1.1-validation: N (an int) means the training script evaluates the model on a
-                     development set held out from training about every N updates, at times it does not announce, and
+                     validation set held out from training about every N updates, at times it does not announce, and
                      reports it with opt.report_dev(loss=..., accuracy=...). The agent sees every measurement
                      (obs.metrics, and a line with their history in each decision message) and the neutral prompt says
                      so in its TASK paragraph ("about every N updates, at times that are not announced");
@@ -166,7 +166,7 @@ def wrap(optimizer, model, *, total_steps, goal, scheduler=None, decisions=None,
                      evaluation (examples/overfit draws one time at random in each epoch), and warns you if the times
                      are regular. Needs a prompt that states it (the neutral one, or a template with
                      {validation_note}). Never report the test set the run is judged by this way.
-    eval_integrity   0.2.2: check that the program does not move the parameters to another point for a development
+    eval_integrity   0.2.2: check that the program does not move the parameters to another point for a validation
                      evaluation and move them back after it (misc/integrity.py). None (default): on with validation=N;
                      True/False: on/off. A run that does is flagged (an eval_integrity event, the report, stderr); the
                      agent is not told of the check. eval_integrity_threshold (5): how many times a tensor's typical
@@ -399,11 +399,11 @@ class AgentOptimizer(
             isinstance(validation, bool) or not isinstance(validation, int) or validation < 1
         ):
             raise ValueError(
-                "opal: validation must be None (off) or the number of updates between development evaluations "
+                "opal: validation must be None (off) or the number of updates between validation evaluations "
                 f"(an int >= 1), got {validation!r}"
             )
         self._validation, self._validation_size = validation, validation_size  # OPAL 0.1.1-validation
-        self._dev = []  # the development measurements so far: dict(update=, loss=, accuracy=)
+        self._dev = []  # the validation measurements so far: dict(update=, loss=, accuracy=)
         if eval_integrity not in (None, True, False):
             raise ValueError(
                 f"opal: eval_integrity must be None (on with validation), True or False, got {eval_integrity!r}"
@@ -1495,11 +1495,11 @@ class AgentOptimizer(
                 self.metrics = self.metrics[-1000:]
 
     def report_dev(self, loss=None, accuracy=None, update=None):
-        """OPAL 0.1.1-validation: report one evaluation on the development set (held out from training; never the
+        """OPAL 0.1.1-validation: report one evaluation on the validation set (held out from training; never the
         test set the run is judged by). With wrap(validation=N) the agent sees it in obs.metrics (as dev_loss and
         dev_accuracy) and, with the history of earlier measurements, in each decision message; it is also kept in
         metrics.jsonl. Without validation= it is only recorded. update defaults to the number of updates applied so
-        far. Values are read on the host here (a development evaluation synchronises anyway). Rank 0 only.
+        far. Values are read on the host here (a validation evaluation synchronises anyway). Rank 0 only.
 
         Call it right after evaluating the parameters as they are after the latest update: with eval_integrity on,
         it opens the check of that evaluation (misc/integrity.py)."""
@@ -1568,10 +1568,10 @@ class AgentOptimizer(
             )
             more = f" and {len(trips) - 4} more tensors" if len(trips) > 4 else ""
             print(
-                f"[opal] evaluation integrity: for the development evaluation after update {t:,}, the program "
+                f"[opal] evaluation integrity: for the validation evaluation after update {t:,}, the program "
                 f"(v{meta.get('version', self.version):03d}) moved {names}{more} to another point and moved them back "
                 "after the evaluation. The run is flagged (eval_integrity in events.jsonl, report.html); read "
-                "programs/ before trusting its development or test results.",
+                "programs/ before trusting its validation or test results.",
                 file=sys.stderr,
                 flush=True,
             )

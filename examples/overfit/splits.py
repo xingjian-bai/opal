@@ -1,10 +1,10 @@
-"""Data for examples/overfit: CIFAR-10, a development split held out from the training set, and the two settings.
+"""Data for examples/overfit: CIFAR-10, a validation split held out from the training set, and the two settings.
 
 Kept apart from train.py on purpose: the agent's reference/ folder holds the training script and the model source, not
 this file (OPAL copies the script and the source of user classes only).
 
 Splits (fixed seeds, NumPy only, the same for every run):
-- development: 10% of each class of the official 50,000 training images (5,000 images, 500 per class), clean labels;
+- validation: 10% of each class of the official 50,000 training images (5,000 images, 500 per class), clean labels;
 - training pool: the other 45,000;
 - test: the official 10,000 test images, clean; logged for us, never shown to the agent.
 
@@ -39,7 +39,7 @@ HF_FILES = {  # LFS sha256 published by Hugging Face (as in examples/cifar10_res
 TORONTO_URL = "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz"
 TORONTO_MD5 = "c32a1d4ab5d03f1284b67883e8d87530"
 
-SPLIT_SEED = 20261018  # development split and the small20 subset
+SPLIT_SEED = 20261018  # validation split and the small20 subset
 NOISE_SEED = 888  # which labels are wrong in label10, and their wrong class
 DEV_FRACTION = 0.10  # of each class of the official training set
 NOISE_FRACTION = 0.10  # label10: of the training images

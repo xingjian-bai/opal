@@ -3,7 +3,7 @@
 
     python train.py --prepare-data         # download CIFAR-10 once
     python train.py                        # plain AdamW
-    python train.py --opal --validation # with the agent, which is shown the development set's scores
+    python train.py --opal --validation # with the agent, which is shown the validation set's scores
 """
 
 from __future__ import annotations
@@ -43,8 +43,8 @@ def parse(argv=None):
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--width", type=int, default=64, help="channels of the first stage (64 = ResNet-18)")
     p.add_argument("--augment", action="store_true", help="random flips and 4-pixel reflect-pad crops (off by default)")
-    p.add_argument("--evals-per-epoch", type=int, default=1, help="development evaluations per epoch (see records.py)")
-    p.add_argument("--eval-seed", type=int, default=0, help="the updates at which the development set is evaluated")
+    p.add_argument("--evals-per-epoch", type=int, default=1, help="validation evaluations per epoch (see records.py)")
+    p.add_argument("--eval-seed", type=int, default=0, help="the updates at which the validation set is evaluated")
     p.add_argument("--test-at-end", action="store_true", help="load and score the test set only after training and OPAL close")
     p.add_argument("--seed", type=int, default=0, help="model initialisation")
     p.add_argument("--data-seed", type=int, default=0, help="data order (and augmentation)")
@@ -57,7 +57,7 @@ def parse(argv=None):
     p.add_argument("--prepare-data", action="store_true", help="download CIFAR-10, then exit")
     # OPAL
     p.add_argument("--opal", action="store_true", help="wrap the AdamW and its schedule with opal.wrap")
-    p.add_argument("--validation", action="store_true", help="OPAL 0.1.1-validation: show the agent the dev set")
+    p.add_argument("--validation", action="store_true", help="OPAL 0.1.1-validation: show the agent the validation set")
     p.add_argument("--backend", default="claude", help="claude, keep, or mailbox:<dir>")
     p.add_argument("--model", default=None, help="agent model (default: claude-opus-5-5, at effort high)")
     p.add_argument("--effort", default=None, help="agent effort (default: high)")

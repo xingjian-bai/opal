@@ -1,5 +1,5 @@
 """examples/overfit/train.py on CPU with synthetic data: the agent-facing texts (decision messages, inbox, system prompt,
-obs.metrics) carry the development measurements and never the test metrics, which only the harness's log holds."""
+obs.metrics) carry the validation measurements and never the test metrics, which only the harness's log holds."""
 
 import importlib.util
 import json
@@ -59,7 +59,7 @@ def test_the_agent_never_sees_test_metrics(tmp_path, setting):
         assert "test_acc" not in text and "test_loss" not in text
         for r in evals:
             assert repr(r["test_loss"]) not in text and repr(r["test_acc"]) not in text
-    # positive control: the development measurements do reach the agent
+    # positive control: the validation measurements do reach the agent
     assert all(set(m) <= {"update", "dev_loss", "dev_accuracy"} for m in seen)
     assert any(m["dev_loss"] == pytest.approx(evals[-2]["dev_loss"]) for m in seen)
     assert json.loads(inbox[-1])["development"][0]["loss"] == pytest.approx(evals[0]["dev_loss"])
@@ -89,7 +89,7 @@ def test_the_files_the_agent_reads_say_nothing_about_the_experiment():
         text = (ROOT / "examples" / "overfit" / name).read_text().lower()
         for word in ("overfit", "wrong", "noise", "noisy", "corrupt", "early", "memoris", "memoriz", "label10", "small20"):
             assert word not in text, (name, word)
-        # 0.2.2: nor when the development set is evaluated (records.py draws the times)
+        # 0.2.2: nor when the validation set is evaluated (records.py draws the times)
         cadence = ("dev_every", "dev-every", "every epoch", "evaluate every", "evaluates every", "eval time")
         for word in cadence + ("evaluation time",):
             assert word not in text, (name, word)

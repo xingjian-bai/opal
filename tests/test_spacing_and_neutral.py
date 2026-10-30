@@ -84,7 +84,7 @@ def test_neutral_example_is_a_reference_file_and_carries_state_over(tmp_path):
 @pytest.mark.parametrize("validation", [None, 25])
 def test_the_default_prompt_is_the_neutral_one(tmp_path, validation):
     """Since 0.2.0 a run with no prompt argument gets the neutral prompt (and its starting analysis), with the
-    development-set option off and on. The names of earlier releases ("legacy", "default", "v1") raise."""
+    validation-set option off and on. The names of earlier releases ("legacy", "default", "v1") raise."""
     kw = dict(validation=validation) if validation else {}
     implicit = wrapped(tmp_path / "a", scripted(), **kw)
     explicit = wrapped(tmp_path / "b", scripted(), prompt="neutral", **kw)

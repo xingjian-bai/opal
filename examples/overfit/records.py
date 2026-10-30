@@ -59,7 +59,7 @@ def deferred_setting(setting, data, data_dir, seed):
 
 
 def eval_updates(steps_per_epoch, epochs, seed=0, per_epoch=1):
-    """The updates after which train.py evaluates the development set (and the test set, for us): in each epoch, one
+    """The updates after which train.py evaluates the validation set (and the test set, for us): in each epoch, one
     update drawn uniformly at random in each of `per_epoch` equal parts of the epoch (a seeded generator, --eval-seed),
     and the run's last update. Kept here, out of the files the agent reads, so that the training script shows no fixed
     cadence: the agent is told only that the script evaluates about every eval_interval(...) updates, at times that are
@@ -124,8 +124,8 @@ class Recorder:
             f.write(json.dumps(rec) + "\n")
 
     def on_eval(self, rec, predict, train_x, train_y, model):
-        """rec holds the script's own measurements (update, losses, development scores); adds the test scores and, for
-        label10, how the model labels the wrongly labelled training images; keeps the best development checkpoint."""
+        """rec holds the script's own measurements (update, losses, validation scores); adds the test scores and, for
+        label10, how the model labels the wrongly labelled training images; keeps the best validation checkpoint."""
         if not self.test_at_end:
             self.test_scores(rec, predict)
         if len(self.wrong):

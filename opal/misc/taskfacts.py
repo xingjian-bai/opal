@@ -263,7 +263,7 @@ def time_limit(seconds) -> str:
     return f"Each decision may take up to {duration(seconds)}."
 
 
-# ----- OPAL 0.1.1-validation (wrap(validation=N)): what the neutral prompt says about the development set ---------
+# ----- OPAL 0.1.1-validation (wrap(validation=N)): what the neutral prompt says about the validation set ---------
 
 EVALUATION_OFF = (
     "Evaluation data and results are not shown to\nyou unless the person running the training chose to show a value, "
@@ -277,7 +277,7 @@ EVALUATION_ON = (
 
 
 def validation_note(every=None, size=None) -> str:
-    """The TASK sentences (appended to the run's facts) when the training script reports a development set:
+    """The TASK sentences (appended to the run's facts) when the training script reports a validation set:
     about every N updates, at times that are not announced."""
     if not every:
         return ""

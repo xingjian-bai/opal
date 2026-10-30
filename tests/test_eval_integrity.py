@@ -1,5 +1,5 @@
 """0.2.2 evaluation integrity (opal/misc/integrity.py): a program that moves the parameters to another point for a
-development evaluation and moves them back after it flags the run; ordinary optimizers do not. The two positive
+validation evaluation and moves them back after it flags the run; ordinary optimizers do not. The two positive
 cases check the classifier scaled by a probe factor around each evaluation and a running average swapped in 49
 updates before each evaluation and the iterate restored after it; the tests give them the evaluation times."""
 
@@ -343,7 +343,7 @@ def eval_times(steps, window, seed=0):
 
 
 def run(tmp_path, program=None, steps=480, window=40, evals=None, subs=None, seed=0, **kw):
-    """Train Net on a fixed random task, evaluating the development batch after each update in `evals` (default: one
+    """Train Net on a fixed random task, evaluating the validation batch after each update in `evals` (default: one
     random time per window) and reporting it. program: an updater.py text (__EVALS__ is replaced by the evaluation
     times, and each key of subs by its value). Returns (events, evaluation updates, the optimizer)."""
     torch.manual_seed(seed)

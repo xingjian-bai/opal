@@ -111,7 +111,7 @@ class CheckpointMixin:
             **(dict(usage=dict(self.worker.usage)) if self.worker and self.worker.usage is not None else {}),
             backend=self.worker.backend.state() if self.worker else {},
             notes_seen=self.run._notes_seen if self.run is not None else 0,
-            dev=list(getattr(self, "_dev", [])),  # validation=N: the development measurements so far
+            dev=list(getattr(self, "_dev", [])),  # validation=N: the validation measurements so far
             run_dir=str(self.run.dir) if self.run is not None else None,
             event_offset=event_offset,
             **(dict(ranks_repaired_at=list(self._ranks_repaired_at)) if self._ranks_repaired_at else {}),

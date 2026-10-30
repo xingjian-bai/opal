@@ -45,12 +45,12 @@ def prompt_template(prompt) -> str:
 
 def resolve_prompt(prompt, validation=None):
     """The prompt a run uses: "neutral" when None. Raises for a prompt that is not a name or a file, and for
-    validation=N with a template that does not state the development set (it has no {validation_note})."""
+    validation=N with a template that does not state the validation set (it has no {validation_note})."""
     text = prompt_template(prompt)
     if validation is not None:
         if "{validation_note}" not in text:
             raise ValueError(
-                "opal: validation=N shows the agent a development set, but this prompt does not say so (it has no "
+                "opal: validation=N shows the agent a validation set, but this prompt does not say so (it has no "
                 "{validation_note} field): use the default neutral prompt, or a template with that field"
             )
     return prompt
