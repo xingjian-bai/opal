@@ -212,14 +212,11 @@ worse: it cannot restart or roll back training, it can only fix its programs at 
 ## Citation
 
 ```bibtex
-@misc{bai2026reactiveoptimizers,
-      title={Reactive Optimizers},
-      author={Xingjian Bai and Jia-Hao Liang and Jayden Teoh and Vincent Sitzmann},
-      year={2026},
-      eprint={2610.33826},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2610.33826},
+@article{bai2026reactive,
+  title={Reactive Optimizers},
+  author={Bai, Xingjian and Liang, Jia-Hao and Teoh, Jayden and Sitzmann, Vincent},
+  journal={arXiv preprint arXiv:2610.33826},
+  year={2026}
 }
 ```
 
